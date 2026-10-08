@@ -152,15 +152,16 @@ button:focus-visible{outline:2px solid var(--max);outline-offset:3px}
 .chip{display:block;transform:skewX(-14deg);background:rgba(255,255,255,.09);border-left:3px solid var(--c1);padding:2px 10px}
 .chip>span{display:block;transform:skewX(14deg);font:700 12px var(--f-num);letter-spacing:.16em;color:var(--ink-soft)}
 .chip b{color:#fff;font-size:16px;margin-left:5px;letter-spacing:.04em}
-.diffs{position:relative;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 18px 0}
+.diffs{position:relative;z-index:3;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:14px 16px 0}
 .dbtn{appearance:none;border:0;padding:0;background:none;cursor:pointer;color:#fff;transform:skewX(-12deg);transition:transform .15s}
-.dbtn>span{display:grid;justify-items:center;gap:3px;padding:7px 4px 8px;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-top:3px solid var(--dcol);transition:background .15s,box-shadow .15s}
+.dbtn>span{display:grid;justify-items:center;gap:3px;padding:7px 2px 8px;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-top:3px solid var(--dcol);transition:background .15s,box-shadow .15s}
 .dbtn>span>*{transform:skewX(12deg)}
-.dn{font-family:var(--f-tech);font-size:8.5px;letter-spacing:.16em;color:var(--dcol)}
-.dl{font:800 italic 34px/.95 var(--f-num);font-variant-numeric:tabular-nums}
+.dn{font-family:var(--f-tech);font-size:8px;letter-spacing:.1em;color:var(--dcol)}
+.dl{font:800 italic 30px/.95 var(--f-num);font-variant-numeric:tabular-nums}
 .dl small{font-size:13px;font-style:normal;letter-spacing:.08em;margin-right:2px;opacity:.7}
 .dp{display:flex;gap:2px}
-.dp i{width:4px;height:6px;background:rgba(255,255,255,.16)}
+.dp{gap:1px!important}
+.dp i{width:3px;height:6px;background:rgba(255,255,255,.16)}
 .dp i.f{background:var(--dcol);box-shadow:0 0 4px var(--dcol)}
 .dc{font:700 11px var(--f-num);letter-spacing:.1em;color:var(--ink-soft)}
 .dbtn.on{transform:skewX(-12deg) translateY(-3px)}
@@ -203,7 +204,7 @@ button:focus-visible{outline:2px solid var(--max);outline-offset:3px}
 .srow .t b{display:block;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .srow .t{min-width:0}
 .srow .lv{display:flex;gap:6px;font:700 12px var(--f-num);letter-spacing:.06em;margin-top:2px}
-.srow .lv span:nth-child(1){color:#3EE6C1}.srow .lv span:nth-child(2){color:#FFA24C}.srow .lv span:nth-child(3){color:#FF3F7A}
+.srow .lv span:nth-child(1){color:#7CC8FF}.srow .lv span:nth-child(2){color:#3EE6C1}.srow .lv span:nth-child(3){color:#FFA24C}.srow .lv span:nth-child(4){color:#FF3F7A}
 .srow .rk{font:800 italic 20px var(--f-num);color:var(--ink-soft);min-width:2.2ch;text-align:right}
 @keyframes fadeIn{from{opacity:0}}
 
@@ -326,7 +327,7 @@ input[type=range]{width:100%;accent-color:var(--c1)}
 #rotate span{font-size:14px;color:var(--ink-soft)}
 @keyframes tilt{0%,30%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
 @media (orientation:landscape) and (max-height:500px){#rotate{display:grid}}
-@media (max-height:700px){.diffs{padding-top:10px}.dl{font-size:28px}.rec{margin-top:8px;min-height:50px}.start{height:54px;margin-top:10px}.s-info{min-height:76px}}
+@media (max-height:700px){.diffs{padding-top:10px}.dl{font-size:26px}.rec{margin-top:8px;min-height:50px}.start{height:54px;margin-top:10px}.s-info{min-height:76px}}
 @media (prefers-reduced-motion:reduce){.t-row,.t-sweep,.t-eq i,.t-spark,.t-start::after,.t-stars,.s-stars,.beams i,.t-ring,.jk.on .jk-in,.jk.on .jk-gloss::after,.start::after,.t-logo h1{animation:none!important}#judge .j.show{animation:none;opacity:1}}
 </style>
 
@@ -463,9 +464,10 @@ input[type=range]{width:100%;accent-color:var(--c1)}
 <script>
 (() => {
 'use strict';
-const SONGS = [{"id":"placebo","title":"플라시보","c1":"#FF3FC4","c2":"#4A1460","img":"jackets/placebo.jpg","inst":"synth","key":[8,1],"bpm":100.0,"duration":215.97,"levels":{"normal":4,"hard":7,"expert":10},"counts":{"normal":558,"hard":839,"expert":1283}},{"id":"toxic","title":"TOXIC","c1":"#B6FF3B","c2":"#1B9E5A","sub":"トキシック · 톡식","img":"jackets/toxic.jpg","inst":"synth","key":[5,0],"bpm":101.59,"duration":181.17,"levels":{"normal":4,"hard":6,"expert":9},"counts":{"normal":373,"hard":648,"expert":940}},{"id":"shubilmer","title":"슈빌러머 쉣크","c1":"#FFB627","c2":"#FF5E3A","img":"jackets/shubilmer.jpg","inst":"marimba","key":[0,0],"bpm":125.01,"duration":177.21,"levels":{"normal":6,"hard":7,"expert":11},"counts":{"normal":649,"hard":729,"expert":1104}},{"id":"starparcel","title":"별빛 택배가 도착했습니다!","c1":"#FFE066","c2":"#4D7CFE","img":"jackets/starparcel.jpg","inst":"bell","key":[9,1],"bpm":146.05,"duration":179.61,"levels":{"normal":6,"hard":8,"expert":11},"counts":{"normal":577,"hard":799,"expert":1158}},{"id":"photo","title":"사진 속의 우리처럼","c1":"#FFC7A8","c2":"#E0607E","img":"jackets/photo.jpg","inst":"piano","key":[9,1],"bpm":88.99,"duration":203.6,"levels":{"normal":4,"hard":6,"expert":9},"counts":{"normal":547,"hard":688,"expert":1027}},{"id":"twoday","title":"둘이 된 하루","c1":"#9EE7FF","c2":"#5B6CFF","img":"jackets/twoday.jpg","inst":"pluck","key":[11,1],"bpm":114.62,"duration":189.96,"levels":{"normal":6,"hard":7,"expert":13},"counts":{"normal":666,"hard":830,"expert":1403}},{"id":"sunset","title":"노을빛에 머문 시선","c1":"#FF9A5A","c2":"#B8336A","img":"jackets/sunset.jpg","inst":"piano","key":[4,0],"bpm":85.99,"duration":154.92,"levels":{"normal":5,"hard":6,"expert":7},"counts":{"normal":421,"hard":490,"expert":676}},{"id":"lighter","title":"너의 하루가 조금은 가벼웠으면","c1":"#C8F7DC","c2":"#3FA7A0","img":"jackets/lighter.jpg","inst":"piano","key":[9,1],"bpm":88.0,"duration":243.88,"levels":{"normal":4,"hard":5,"expert":8},"counts":{"normal":643,"hard":769,"expert":1127}},{"id":"nowords","title":"아무 말 안해도","c1":"#E6D3FF","c2":"#8A5CF6","img":"jackets/nowords.jpg","inst":"pluck","key":[10,0],"bpm":110.0,"duration":234.96,"levels":{"normal":6,"hard":7,"expert":11},"counts":{"normal":817,"hard":1007,"expert":1519}},{"id":"ourstars","title":"우리의 별빛 아래","c1":"#B9C8FF","c2":"#2E3A8C","img":"jackets/ourstars.jpg","inst":"bell","key":[3,0],"bpm":130.04,"duration":221.4,"levels":{"normal":5,"hard":7,"expert":10},"counts":{"normal":643,"hard":887,"expert":1306}},{"id":"beforedawn","title":"새벽이 오기 전","c1":"#7FD1FF","c2":"#24325F","img":"jackets/beforedawn.jpg","inst":"piano","key":[3,0],"bpm":115.0,"duration":196.43,"levels":{"normal":6,"hard":8,"expert":11},"counts":{"normal":719,"hard":845,"expert":1261}},{"id":"meetagain","title":"다시 만나는 날엔","c1":"#FFD1E8","c2":"#C2417F","img":"jackets/meetagain.jpg","inst":"pluck","key":[10,0],"bpm":128.12,"duration":177.68,"levels":{"normal":5,"hard":7,"expert":11},"counts":{"normal":498,"hard":733,"expert":1048}},{"id":"beyonddawn","title":"새벽 너머로","c1":"#A8F0FF","c2":"#6A3DE8","img":"jackets/beyonddawn.jpg","inst":"piano","key":[7,1],"bpm":109.36,"duration":217.6,"levels":{"normal":5,"hard":7,"expert":10},"counts":{"normal":567,"hard":825,"expert":1224}}];
+const SONGS = [{"id":"placebo","title":"플라시보","c1":"#FF3FC4","c2":"#4A1460","img":"jackets/placebo.jpg","inst":"synth","key":[8,1],"bpm":100.0,"duration":215.97,"levels":{"easy":2,"normal":4,"hard":7,"expert":10},"counts":{"easy":308,"normal":558,"hard":839,"expert":1283}},{"id":"toxic","title":"TOXIC","c1":"#B6FF3B","c2":"#1B9E5A","sub":"トキシック · 톡식","img":"jackets/toxic.jpg","inst":"synth","key":[5,0],"bpm":101.59,"duration":181.17,"levels":{"easy":2,"normal":4,"hard":6,"expert":9},"counts":{"easy":253,"normal":373,"hard":648,"expert":940}},{"id":"shubilmer","title":"슈빌러머 쉣크","c1":"#FFB627","c2":"#FF5E3A","img":"jackets/shubilmer.jpg","inst":"marimba","key":[0,0],"bpm":125.01,"duration":177.21,"levels":{"easy":3,"normal":6,"hard":7,"expert":11},"counts":{"easy":252,"normal":649,"hard":729,"expert":1104}},{"id":"starparcel","title":"별빛 택배가 도착했습니다!","c1":"#FFE066","c2":"#4D7CFE","img":"jackets/starparcel.jpg","inst":"bell","key":[9,1],"bpm":146.05,"duration":179.61,"levels":{"easy":3,"normal":6,"hard":8,"expert":11},"counts":{"easy":256,"normal":577,"hard":799,"expert":1158}},{"id":"photo","title":"사진 속의 우리처럼","c1":"#FFC7A8","c2":"#E0607E","img":"jackets/photo.jpg","inst":"piano","key":[9,1],"bpm":88.99,"duration":203.6,"levels":{"easy":2,"normal":4,"hard":6,"expert":9},"counts":{"easy":290,"normal":547,"hard":688,"expert":1027}},{"id":"twoday","title":"둘이 된 하루","c1":"#9EE7FF","c2":"#5B6CFF","img":"jackets/twoday.jpg","inst":"pluck","key":[11,1],"bpm":114.62,"duration":189.96,"levels":{"easy":3,"normal":6,"hard":7,"expert":13},"counts":{"easy":271,"normal":666,"hard":830,"expert":1403}},{"id":"sunset","title":"노을빛에 머문 시선","c1":"#FF9A5A","c2":"#B8336A","img":"jackets/sunset.jpg","inst":"piano","key":[4,0],"bpm":85.99,"duration":154.92,"levels":{"easy":2,"normal":5,"hard":6,"expert":7},"counts":{"easy":214,"normal":421,"hard":490,"expert":676}},{"id":"lighter","title":"너의 하루가 조금은 가벼웠으면","c1":"#C8F7DC","c2":"#3FA7A0","img":"jackets/lighter.jpg","inst":"piano","key":[9,1],"bpm":88.0,"duration":243.88,"levels":{"easy":2,"normal":4,"hard":5,"expert":8},"counts":{"easy":342,"normal":643,"hard":769,"expert":1127}},{"id":"nowords","title":"아무 말 안해도","c1":"#E6D3FF","c2":"#8A5CF6","img":"jackets/nowords.jpg","inst":"pluck","key":[10,0],"bpm":110.0,"duration":234.96,"levels":{"easy":3,"normal":6,"hard":7,"expert":11},"counts":{"easy":336,"normal":817,"hard":1007,"expert":1519}},{"id":"ourstars","title":"우리의 별빛 아래","c1":"#B9C8FF","c2":"#2E3A8C","img":"jackets/ourstars.jpg","inst":"bell","key":[3,0],"bpm":130.04,"duration":221.4,"levels":{"easy":3,"normal":5,"hard":7,"expert":10},"counts":{"easy":316,"normal":643,"hard":887,"expert":1306}},{"id":"beforedawn","title":"새벽이 오기 전","c1":"#7FD1FF","c2":"#24325F","img":"jackets/beforedawn.jpg","inst":"piano","key":[3,0],"bpm":115.0,"duration":196.43,"levels":{"easy":3,"normal":6,"hard":8,"expert":11},"counts":{"easy":280,"normal":719,"hard":845,"expert":1261}},{"id":"meetagain","title":"다시 만나는 날엔","c1":"#FFD1E8","c2":"#C2417F","img":"jackets/meetagain.jpg","inst":"pluck","key":[10,0],"bpm":128.12,"duration":177.68,"levels":{"easy":3,"normal":5,"hard":7,"expert":11},"counts":{"easy":253,"normal":498,"hard":733,"expert":1048}},{"id":"beyonddawn","title":"새벽 너머로","c1":"#A8F0FF","c2":"#6A3DE8","img":"jackets/beyonddawn.jpg","inst":"piano","key":[7,1],"bpm":109.36,"duration":217.6,"levels":{"easy":3,"normal":5,"hard":7,"expert":10},"counts":{"easy":311,"normal":567,"hard":825,"expert":1224}}];
 const SHARE_URL = 'https://baed73117.github.io/starbeat/';
 const DIFFS = [
+  {k: 'easy', name: 'EASY', color: '#7CC8FF'},
   {k: 'normal', name: 'NORMAL', color: '#3EE6C1'},
   {k: 'hard', name: 'HARD', color: '#FFA24C'},
   {k: 'expert', name: 'EXPERT', color: '#FF3F7A'},
@@ -494,7 +496,7 @@ const HIT_TYPES = [
   {k: 'bell', name: '벨'}, {k: 'synth', name: '신스'}, {k: 'chip', name: '8비트'}, {k: 'off', name: '끄기'},
 ];
 const KEYS_READY = true;
-const fresh = () => ({speed: 4.5, offset: 0, sfx: true, bga: true, keys: true, keysV: 1, hit: 'tick', hitVol: 50, hitV: 2, diff: 'normal', last: SONGS[0] ? SONGS[0].id : '', best: {}});
+const fresh = () => ({speed: 4.5, offset: 0, sfx: true, bga: true, keys: true, keysV: 1, hit: 'tick', hitVol: 50, hitV: 2, diff: 'easy', last: SONGS[0] ? SONGS[0].id : '', best: {}});
 let save = fresh(), raw = null;
 try { raw = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (raw && typeof raw === 'object') save = Object.assign(fresh(), raw); else raw = null; } catch (e) {}
 const num = (v, lo, hi, d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
@@ -1072,7 +1074,7 @@ function buildSheet() {
   SONGS.forEach((s, i) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'srow';
-    b.innerHTML = `<img alt="" style="background:linear-gradient(135deg,${s.c1},${s.c2})"><span class="t"><b></b><span class="lv"><span>NM ${s.levels.normal}</span><span>HD ${s.levels.hard}</span><span>EX ${s.levels.expert}</span></span></span><span class="rk"></span>`;
+    b.innerHTML = `<img alt="" style="background:linear-gradient(135deg,${s.c1},${s.c2})"><span class="t"><b></b><span class="lv"><span>EZ ${s.levels.easy}</span><span>NM ${s.levels.normal}</span><span>HD ${s.levels.hard}</span><span>EX ${s.levels.expert}</span></span></span><span class="rk"></span>`;
     b.querySelector('.t b').textContent = s.title;
     b.addEventListener('click', () => { $('#sheet').hidden = true; goTo(i); });
     list.appendChild(b); sheetRows[s.id] = b;
@@ -1884,7 +1886,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') { e.preventDefault(); stepSong(-1); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); stepSong(1); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); setDiff(DIFFS[Math.max(0, i - 1)].k); }
-  else if (e.key === 'ArrowDown') { e.preventDefault(); setDiff(DIFFS[Math.min(2, i + 1)].k); }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); setDiff(DIFFS[Math.min(DIFFS.length - 1, i + 1)].k); }
   else if (e.key === 'Enter' && document.activeElement === document.body) { e.preventDefault(); startSong(sel, save.diff); }
 });
 document.addEventListener('keyup', e => { const l = KEYS[e.code]; if (l !== undefined) release(l, evT(e)); });
