@@ -329,6 +329,13 @@ input[type=range]{width:100%;accent-color:var(--c1)}
 @media (orientation:landscape) and (max-height:500px){#rotate{display:grid}}
 @media (max-height:700px){.diffs{padding-top:10px}.dl{font-size:26px}.rec{margin-top:8px;min-height:50px}.start{height:54px;margin-top:10px}.s-info{min-height:76px}}
 @media (prefers-reduced-motion:reduce){.t-row,.t-sweep,.t-eq i,.t-spark,.t-start::after,.t-stars,.s-stars,.beams i,.t-ring,.jk.on .jk-in,.jk.on .jk-gloss::after,.start::after,.t-logo h1{animation:none!important}#judge .j.show{animation:none;opacity:1}}
+/* 홈페이지 랭킹 */
+.rank-row input{user-select:text;-webkit-user-select:text}
+.rankbox{display:grid;gap:6px;padding:10px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.rank-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}
+.rank-row input{width:150px;padding:9px 10px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.3);font:700 16px var(--f-title);color:var(--ink);text-align:center}
+.rank-row .btn{font:700 15px var(--f-title);letter-spacing:0;padding:9px 12px}
+.rank-msg{margin:0;font-size:13px;color:var(--ink-soft)}
 </style>
 
 <div id="stage">
@@ -423,6 +430,10 @@ input[type=range]{width:100%;accent-color:var(--c1)}
         <div><dt style="color:var(--break)">BREAK</dt><dd id="rBreak">0</dd></div>
       </dl>
       <div class="rline">MAX COMBO <b id="rCombo">0</b><span class="badge" id="rBadge" hidden></span><span class="newbest" id="rNew" hidden>NEW RECORD</span></div>
+      <div class="rankbox" id="rankBox" hidden>
+        <div class="rank-row"><input id="rankName" maxlength="10" placeholder="카톡방 닉네임" aria-label="랭킹에 쓸 이름 (카톡방 닉네임)" autocomplete="nickname"><button class="btn main" id="btnRankUp" type="button">🏆 랭킹에 올리기</button></div>
+        <p class="rank-msg" id="rankMsg"></p>
+      </div>
       <div class="row2"><button class="btn" id="btnRetry" type="button"><span>RETRY</span></button><button class="btn main" id="btnBack" type="button"><span>SELECT</span></button></div>
       <button class="btn" id="btnBrag" type="button"><span class="kr">기록 자랑하기</span></button>
       <textarea class="brag-text" id="bragText" rows="3" readonly hidden aria-label="자랑하기 문구"></textarea>
@@ -1789,12 +1800,84 @@ function finish() {
   $('#rNew').hidden = !isNew;
   const badge = $('#rBadge'); badge.hidden = !fc; badge.textContent = perfect && fc ? 'PERFECT' : 'FULL COMBO'; badge.className = 'badge' + (perfect && fc ? ' pp' : '');
   $('#bragText').hidden = true;
+  RankUI.show('starbeat', Math.round(score), `${cur.song.title} · ${DIFF[diff].name} ${cur.song.levels[diff]}`);
   const bn = $('#banner');
   $('#bannerText').textContent = perfect && fc ? 'PERFECT PLAY' : fc ? 'FULL COMBO' : 'CLEAR';
   bn.hidden = false; bn.classList.remove('go'); void bn.offsetWidth; bn.classList.add('go');
   if (fc) flashScreen();
   setTimeout(() => { bn.hidden = true; bn.classList.remove('go'); if (state === 'result') $('#result').hidden = false; }, 1500);
 }
+/* ---------- 홈페이지 랭킹 (구글 시트) · 깃허브 홈페이지에서만 켜짐 ---------- */
+const RANK_URL = 'https://script.google.com/macros/s/AKfycbxZd7p2170PY_5dziBDyKevWCDt5Eth3L0gTGQB_ufVPdT5ksF66qwDr6rlBceJvfFO0w/exec';
+const RankNet = {
+  on: !!RANK_URL && /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname),
+  id() {
+    try {
+      let v = localStorage.getItem('astra-rank-id');
+      if (!v || !/^[0-9a-f]{16,32}$/.test(v)) { v = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('astra-rank-id', v); }
+      return v;
+    } catch (e) { return this.tmp || (this.tmp = Array.from({length: 24}, () => Math.floor(Math.random() * 16).toString(16)).join('')); }
+  },
+  get name() { try { return localStorage.getItem('astra-rank-name') || ''; } catch (e) { return ''; } },
+  set name(v) { try { localStorage.setItem('astra-rank-name', v); } catch (e) {} },
+  sent(game) { try { return Number(localStorage.getItem('astra-rank-sent-' + game)) || 0; } catch (e) { return 0; } },
+  // 15초 넘게 답이 없으면 그만 기다린다 (폰 인터넷이 끊겨도 버튼이 멈추지 않게)
+  async req(opt) {
+    const ac = typeof AbortController === 'function' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), 15000);
+    try { const r = await fetch(RANK_URL, Object.assign({}, opt, ac ? {signal: ac.signal} : {})); return await r.json(); }
+    finally { if (t) clearTimeout(t); }
+  },
+  async send(game, name, score, info) {
+    const j = await this.req({method: 'POST', body: JSON.stringify({game, name, score: Math.floor(score), info, id: this.id()})});
+    if (j && j.ok) { try { localStorage.setItem('astra-rank-sent-' + game, String(Math.max(this.sent(game), Number(j.best) || 0))); } catch (e) {} }
+    return j;
+  },
+  top() { return this.req({cache: 'no-store'}); },
+};
+// 결과 화면의 '랭킹에 올리기' 상자. 이름이 저장돼 있고 새 최고 기록이면 자동으로 올린다
+const RankUI = {
+  game: '', score: 0, info: '', run: 0, onName: null,
+  show(game, score, info) {
+    const box = $('#rankBox');
+    if (!box) return;
+    this.run++;
+    box.hidden = !RankNet.on || !(score > 0);
+    if (box.hidden) return;
+    Object.assign(this, {game, score: Math.floor(score), info});
+    const btn = $('#btnRankUp');
+    $('#rankName').value = RankNet.name;
+    btn.disabled = false; btn.textContent = '🏆 랭킹에 올리기';
+    $('#rankMsg').textContent = RankNet.name ? '1·2·3등은 홈페이지에 이름이 나와요' : '카톡방 닉네임을 적고 올려 주세요 · 1·2·3등은 홈페이지에 나와요';
+    if (RankNet.name && this.score > RankNet.sent(game)) this.up(true);
+  },
+  async up(auto) {
+    const inp = $('#rankName'), btn = $('#btnRankUp'), msg = $('#rankMsg'), run = this.run;
+    if (btn.disabled) return;
+    const name = Array.from(inp.value.replace(/[\u0000-\u001f<>]/g, '').trim()).slice(0, 10).join('');
+    if (!name) { if (!auto) { msg.textContent = '카톡방 닉네임을 먼저 적어 주세요.'; inp.focus(); } return; }
+    RankNet.name = name;
+    if (this.onName) this.onName(name);
+    btn.disabled = true; btn.textContent = '올리는 중…';
+    let text;
+    try {
+      const r = await RankNet.send(this.game, name, this.score, this.info);
+      if (r && r.ok) {
+        if (run !== this.run) return;
+        msg.textContent = r.rank <= 3 ? `🏆 전체 ${r.rank}등! 홈페이지에 이름이 올라가요` : `전체 ${r.rank}등이에요 · 내 최고 ${Number(r.best).toLocaleString('ko-KR')}`;
+        btn.textContent = '✔ 랭킹에 올렸어요';
+        return;
+      }
+      if (r && r.why === 'slow' && auto === true && run === this.run) {
+        msg.textContent = '잠시 후 자동으로 다시 올려요…'; btn.disabled = false; btn.textContent = '🏆 랭킹에 올리기';
+        setTimeout(() => { if (run === this.run) this.up('retry'); }, 5500);
+        return;
+      }
+      text = r && r.why === 'slow' ? '잠깐만요, 몇 초 뒤에 다시 눌러 주세요.' : '이 점수는 랭킹에 올릴 수 없어요.';
+    } catch (e) { text = '지금은 연결이 안 돼요. 잠시 후 다시 눌러 주세요.'; }
+    if (run !== this.run) return;
+    msg.textContent = text; btn.disabled = false; btn.textContent = '🏆 랭킹에 올리기';
+  },
+};
 async function brag() {
   if (!last || !cur) return;
   const text = `별빛 비트 · ${cur.song.title} [${DIFF[cur.diff].name} ${cur.song.levels[cur.diff]}]\n${last.rank} · ${last.acc.toFixed(2)}% · ${fmt(last.score)}점${last.fc ? ' · FULL COMBO' : ''}\n나 이겨 볼 사람? → ${SHARE_URL}`;
@@ -1903,6 +1986,8 @@ $('#btnPlay').addEventListener('click', () => { audio(); startSong(sel, save.dif
 $('#btnRetry').addEventListener('click', () => { if (cur) startSong(cur.song, cur.diff); });
 $('#btnBack').addEventListener('click', goSelect);
 $('#btnBrag').addEventListener('click', brag);
+$('#btnRankUp').addEventListener('click', () => RankUI.up(false));
+$('#rankName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); RankUI.up(false); } });
 $('#btnPause').addEventListener('click', pauseGame);
 $('#btnResume').addEventListener('click', resumeGame);
 $('#btnPRetry').addEventListener('click', () => { if (cur) startSong(cur.song, cur.diff); });
