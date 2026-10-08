@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="자작곡 13곡으로 즐기는 4라인 리듬게임 · NORMAL / HARD / EXPERT">
+<meta name="description" content="오리지널 14곡으로 즐기는 4라인 리듬게임 · EASY / NORMAL / HARD / EXPERT">
 <meta name="theme-color" content="#060812">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="별빛 비트">
 <meta property="og:title" content="별빛 비트 · STARLIGHT BEAT">
-<meta property="og:description" content="자작곡 13곡으로 즐기는 4라인 리듬게임 · NORMAL / HARD / EXPERT">
+<meta property="og:description" content="오리지널 14곡으로 즐기는 4라인 리듬게임 · EASY / NORMAL / HARD / EXPERT">
 <meta property="og:image" content="https://baed73117.github.io/starbeat/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://baed73117.github.io/starbeat/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="별빛 비트 · STARLIGHT BEAT">
-<meta name="twitter:description" content="자작곡 13곡으로 즐기는 4라인 리듬게임 · NORMAL / HARD / EXPERT">
+<meta name="twitter:description" content="오리지널 14곡으로 즐기는 4라인 리듬게임 · EASY / NORMAL / HARD / EXPERT">
 <meta name="twitter:image" content="https://baed73117.github.io/starbeat/og.jpg">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
@@ -464,7 +464,7 @@ input[type=range]{width:100%;accent-color:var(--c1)}
 <script>
 (() => {
 'use strict';
-const SONGS = [{"id":"placebo","title":"플라시보","c1":"#FF3FC4","c2":"#4A1460","img":"jackets/placebo.jpg","inst":"synth","key":[8,1],"bpm":100.0,"duration":215.97,"levels":{"easy":2,"normal":4,"hard":7,"expert":10},"counts":{"easy":308,"normal":558,"hard":839,"expert":1283}},{"id":"toxic","title":"TOXIC","c1":"#B6FF3B","c2":"#1B9E5A","sub":"トキシック · 톡식","img":"jackets/toxic.jpg","inst":"synth","key":[5,0],"bpm":101.59,"duration":181.17,"levels":{"easy":2,"normal":4,"hard":6,"expert":9},"counts":{"easy":253,"normal":373,"hard":648,"expert":940}},{"id":"shubilmer","title":"슈빌러머 쉣크","c1":"#FFB627","c2":"#FF5E3A","img":"jackets/shubilmer.jpg","inst":"marimba","key":[0,0],"bpm":125.01,"duration":177.21,"levels":{"easy":3,"normal":6,"hard":7,"expert":11},"counts":{"easy":252,"normal":649,"hard":729,"expert":1104}},{"id":"starparcel","title":"별빛 택배가 도착했습니다!","c1":"#FFE066","c2":"#4D7CFE","img":"jackets/starparcel.jpg","inst":"bell","key":[9,1],"bpm":146.05,"duration":179.61,"levels":{"easy":3,"normal":6,"hard":8,"expert":11},"counts":{"easy":256,"normal":577,"hard":799,"expert":1158}},{"id":"photo","title":"사진 속의 우리처럼","c1":"#FFC7A8","c2":"#E0607E","img":"jackets/photo.jpg","inst":"piano","key":[9,1],"bpm":88.99,"duration":203.6,"levels":{"easy":2,"normal":4,"hard":6,"expert":9},"counts":{"easy":290,"normal":547,"hard":688,"expert":1027}},{"id":"twoday","title":"둘이 된 하루","c1":"#9EE7FF","c2":"#5B6CFF","img":"jackets/twoday.jpg","inst":"pluck","key":[11,1],"bpm":114.62,"duration":189.96,"levels":{"easy":3,"normal":6,"hard":7,"expert":13},"counts":{"easy":271,"normal":666,"hard":830,"expert":1403}},{"id":"sunset","title":"노을빛에 머문 시선","c1":"#FF9A5A","c2":"#B8336A","img":"jackets/sunset.jpg","inst":"piano","key":[4,0],"bpm":85.99,"duration":154.92,"levels":{"easy":2,"normal":5,"hard":6,"expert":7},"counts":{"easy":214,"normal":421,"hard":490,"expert":676}},{"id":"lighter","title":"너의 하루가 조금은 가벼웠으면","c1":"#C8F7DC","c2":"#3FA7A0","img":"jackets/lighter.jpg","inst":"piano","key":[9,1],"bpm":88.0,"duration":243.88,"levels":{"easy":2,"normal":4,"hard":5,"expert":8},"counts":{"easy":342,"normal":643,"hard":769,"expert":1127}},{"id":"nowords","title":"아무 말 안해도","c1":"#E6D3FF","c2":"#8A5CF6","img":"jackets/nowords.jpg","inst":"pluck","key":[10,0],"bpm":110.0,"duration":234.96,"levels":{"easy":3,"normal":6,"hard":7,"expert":11},"counts":{"easy":336,"normal":817,"hard":1007,"expert":1519}},{"id":"ourstars","title":"우리의 별빛 아래","c1":"#B9C8FF","c2":"#2E3A8C","img":"jackets/ourstars.jpg","inst":"bell","key":[3,0],"bpm":130.04,"duration":221.4,"levels":{"easy":3,"normal":5,"hard":7,"expert":10},"counts":{"easy":316,"normal":643,"hard":887,"expert":1306}},{"id":"beforedawn","title":"새벽이 오기 전","c1":"#7FD1FF","c2":"#24325F","img":"jackets/beforedawn.jpg","inst":"piano","key":[3,0],"bpm":115.0,"duration":196.43,"levels":{"easy":3,"normal":6,"hard":8,"expert":11},"counts":{"easy":280,"normal":719,"hard":845,"expert":1261}},{"id":"meetagain","title":"다시 만나는 날엔","c1":"#FFD1E8","c2":"#C2417F","img":"jackets/meetagain.jpg","inst":"pluck","key":[10,0],"bpm":128.12,"duration":177.68,"levels":{"easy":3,"normal":5,"hard":7,"expert":11},"counts":{"easy":253,"normal":498,"hard":733,"expert":1048}},{"id":"beyonddawn","title":"새벽 너머로","c1":"#A8F0FF","c2":"#6A3DE8","img":"jackets/beyonddawn.jpg","inst":"piano","key":[7,1],"bpm":109.36,"duration":217.6,"levels":{"easy":3,"normal":5,"hard":7,"expert":10},"counts":{"easy":311,"normal":567,"hard":825,"expert":1224}}];
+const SONGS = [{"id":"placebo","title":"플라시보","c1":"#FF3FC4","c2":"#4A1460","img":"jackets/placebo.jpg","inst":"synth","key":[8,1],"bpm":100.0,"duration":215.97,"levels":{"easy":2,"normal":4,"hard":7,"expert":10},"counts":{"easy":308,"normal":558,"hard":839,"expert":1283}},{"id":"toxic","title":"TOXIC","c1":"#B6FF3B","c2":"#1B9E5A","sub":"トキシック · 톡식","img":"jackets/toxic.jpg","inst":"synth","key":[5,0],"bpm":101.59,"duration":181.17,"levels":{"easy":2,"normal":4,"hard":6,"expert":9},"counts":{"easy":253,"normal":373,"hard":648,"expert":940}},{"id":"shubilmer","title":"슈빌러머 쉣크","c1":"#FFB627","c2":"#FF5E3A","img":"jackets/shubilmer.jpg","inst":"marimba","key":[0,0],"bpm":125.01,"duration":177.21,"levels":{"easy":3,"normal":6,"hard":7,"expert":11},"counts":{"easy":252,"normal":649,"hard":729,"expert":1104}},{"id":"starparcel","title":"별빛 택배가 도착했습니다!","c1":"#FFE066","c2":"#4D7CFE","img":"jackets/starparcel.jpg","inst":"bell","key":[9,1],"bpm":146.05,"duration":179.61,"levels":{"easy":3,"normal":6,"hard":8,"expert":11},"counts":{"easy":256,"normal":577,"hard":799,"expert":1158}},{"id":"photo","title":"사진 속의 우리처럼","c1":"#FFC7A8","c2":"#E0607E","img":"jackets/photo.jpg","inst":"piano","key":[9,1],"bpm":88.99,"duration":203.6,"levels":{"easy":2,"normal":4,"hard":6,"expert":9},"counts":{"easy":290,"normal":547,"hard":688,"expert":1027}},{"id":"twoday","title":"둘이 된 하루","c1":"#9EE7FF","c2":"#5B6CFF","img":"jackets/twoday.jpg","inst":"pluck","key":[11,1],"bpm":114.62,"duration":189.96,"levels":{"easy":3,"normal":6,"hard":7,"expert":13},"counts":{"easy":271,"normal":666,"hard":830,"expert":1403}},{"id":"sunset","title":"노을빛에 머문 시선","c1":"#FF9A5A","c2":"#B8336A","img":"jackets/sunset.jpg","inst":"piano","key":[4,0],"bpm":85.99,"duration":154.92,"levels":{"easy":2,"normal":5,"hard":6,"expert":7},"counts":{"easy":214,"normal":421,"hard":490,"expert":676}},{"id":"lighter","title":"너의 하루가 조금은 가벼웠으면","c1":"#C8F7DC","c2":"#3FA7A0","img":"jackets/lighter.jpg","inst":"piano","key":[9,1],"bpm":88.0,"duration":243.88,"levels":{"easy":2,"normal":4,"hard":5,"expert":8},"counts":{"easy":342,"normal":643,"hard":769,"expert":1127}},{"id":"nowords","title":"아무 말 안해도","c1":"#E6D3FF","c2":"#8A5CF6","img":"jackets/nowords.jpg","inst":"pluck","key":[10,0],"bpm":110.0,"duration":234.96,"levels":{"easy":3,"normal":6,"hard":7,"expert":11},"counts":{"easy":336,"normal":817,"hard":1007,"expert":1519}},{"id":"ourstars","title":"우리의 별빛 아래","c1":"#B9C8FF","c2":"#2E3A8C","img":"jackets/ourstars.jpg","inst":"bell","key":[3,0],"bpm":130.04,"duration":221.4,"levels":{"easy":3,"normal":5,"hard":7,"expert":10},"counts":{"easy":316,"normal":643,"hard":887,"expert":1306}},{"id":"beforedawn","title":"새벽이 오기 전","c1":"#7FD1FF","c2":"#24325F","img":"jackets/beforedawn.jpg","inst":"piano","key":[3,0],"bpm":115.0,"duration":196.43,"levels":{"easy":3,"normal":6,"hard":8,"expert":11},"counts":{"easy":280,"normal":719,"hard":845,"expert":1261}},{"id":"meetagain","title":"다시 만나는 날엔","c1":"#FFD1E8","c2":"#C2417F","img":"jackets/meetagain.jpg","inst":"pluck","key":[10,0],"bpm":128.12,"duration":177.68,"levels":{"easy":3,"normal":5,"hard":7,"expert":11},"counts":{"easy":253,"normal":498,"hard":733,"expert":1048}},{"id":"beyonddawn","title":"새벽 너머로","c1":"#A8F0FF","c2":"#6A3DE8","img":"jackets/beyonddawn.jpg","inst":"piano","key":[7,1],"bpm":109.36,"duration":217.6,"levels":{"easy":3,"normal":5,"hard":7,"expert":10},"counts":{"easy":311,"normal":567,"hard":825,"expert":1224}},{"id":"kiss","title":"最後のキスは嘘","c1":"#FF4D6D","c2":"#3A0D2E","sub":"SHINYA · 마지막 키스는 거짓말","img":"jackets/kiss.jpg","inst":"synth","key":[8,1],"bpm":93.04,"duration":286.2,"levels":{"easy":2,"normal":3,"hard":6,"expert":13},"counts":{"easy":290,"normal":535,"hard":979,"expert":2153}}];
 const SHARE_URL = 'https://baed73117.github.io/starbeat/';
 const DIFFS = [
   {k: 'easy', name: 'EASY', color: '#7CC8FF'},
@@ -864,7 +864,7 @@ function loadCovers() {
 const coverSrc = s => (COVER[s.id] && COVER[s.id].url) || (s.img ? A(s.img) : '');
 
 /* ---------- 타이틀 ---------- */
-$('#tFoot').textContent = `${SONGS.length} tracks · 4 lines · 3 levels`;
+$('#tFoot').textContent = `${SONGS.length} tracks · 4 lines · ${DIFFS.length} levels`;
 // 타이틀 배경: 곡 커버들이 비스듬히 흘러가는 벽 (줄마다 순서를 달리하고 두 번 이어 붙여 끊김 없이)
 document.querySelectorAll('#tWall .t-row').forEach((row, r) => {
   const list = SONGS.map((_, i) => SONGS[(i * (r + 2) + r * 5) % SONGS.length]);
@@ -1343,7 +1343,8 @@ let feverGauge = 0, feverMult = 1, feverTime = 0;
 let pool = [], drawFrom = 0, lastEnd = 0, byLane = [[], [], [], []];
 function speedPx() { return viewH * (0.32 + save.speed * 0.16); }
 const RHY = ['#FF5C9A', '#55D8FF', '#FFD54D', '#B48CFF'];
-function rhythmColor(t, chart) {
+function rhythmColor(t, chart, sub) {
+  if (sub !== undefined) return RHY[sub] || RHY[3];
   const ph = (t - chart.offset) / (60 / chart.bpm);
   const near = k => Math.abs(ph * k - Math.round(ph * k)) < .12;
   return near(1) ? RHY[0] : near(2) ? RHY[1] : near(4) ? RHY[2] : RHY[3];
@@ -1355,7 +1356,7 @@ const thumbOn = () => (save.thumb === null ? PRIMARY_TOUCH : save.thumb);
 const MIRROR = [3, 2, 1, 0];
 function thumbChart(src) {
   const hand = l => (l < 2 ? 0 : 1);
-  const list = src.map(([t, lane, len]) => ({t, lane, len})).sort((a, b) => a.t - b.t || a.lane - b.lane);
+  const list = src.map(([t, lane, len, sub]) => ({t, lane, len, sub})).sort((a, b) => a.t - b.t || a.lane - b.lane);
   const out = [], holdEnd = [-1, -1], laneLast = [-9, -9, -9, -9];
   for (const n of list) {
     const busy = [holdEnd[0] > n.t - .02, holdEnd[1] > n.t - .02];
@@ -1371,17 +1372,17 @@ function thumbChart(src) {
     if (n.t - laneLast[lane] < .06) continue;
     let len = n.len;
     if (len > 0 && (busy[1 - h] || same.length)) len = 0; // 양손이 동시에 묶이지 않게
-    out.push({t: n.t, lane, len});
+    out.push({t: n.t, lane, len, sub: n.sub});
     laneLast[lane] = n.t + len;
     if (len > 0) holdEnd[h] = n.t + len;
   }
-  return out.map(o => [o.t, o.lane, o.len]);
+  return out.map(o => (o.sub === undefined ? [o.t, o.lane, o.len] : [o.t, o.lane, o.len, o.sub]));
 }
 function buildNotes(chart, diff) {
   pool.forEach(o => { o.head.destroy(); if (o.body) o.body.destroy(); });
   pool = []; notes = [];
-  (thumbOn() ? thumbChart(chart[diff]) : chart[diff]).forEach(([t, lane, len]) => {
-    const tx = noteTex(rhythmColor(t, chart));
+  (thumbOn() ? thumbChart(chart[diff]) : chart[diff]).forEach(([t, lane, len, sub]) => {
+    const tx = noteTex(rhythmColor(t, chart, sub));
     const n = {t, lane, len, judged: false, tailDone: false, head: new PIXI.Sprite(tx.head), body: null};
     n.head.anchor.set(.5); n.head.visible = false;
     if (len > 0) { n.body = new PIXI.Sprite(tx.body); n.body.anchor.set(.5, 1); n.body.visible = false; L.notes.addChild(n.body); }
@@ -1681,7 +1682,14 @@ function bgaUpdate(st, dt) {
   artAlpha += (want - artAlpha) * Math.min(1, dt * 1.5);
   L.art.alpha = artAlpha;
   if (!save.bga) return;
-  const per = 60 / cur.chart.bpm, b = Math.floor((st - cur.chart.offset) / per);
+  const bt = cur.chart.beats;
+  let per = 60 / cur.chart.bpm, b;
+  if (bt && bt.length > 1) {
+    let lo = 0, hi = bt.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (bt[m] <= st) lo = m; else hi = m - 1; }
+    b = st < bt[0] ? -1 : lo;
+    if (b >= 0 && b < bt.length - 1) per = bt[b + 1] - bt[b];
+  } else b = Math.floor((st - cur.chart.offset) / per);
   if (b !== lastBeat && st > 0) {
     lastBeat = b;
     const strong = b % 4 === 0;
