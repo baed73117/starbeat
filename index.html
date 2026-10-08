@@ -444,6 +444,8 @@ input[type=range]{width:100%;accent-color:var(--c1)}
       <div class="setting"><label for="sSpeed">노트 속도 <b id="sSpeedV"></b></label><input type="range" id="sSpeed" min="1" max="8" step="0.5"></div>
       <div class="setting"><label for="sOffset">싱크 조절 <b id="sOffsetV"></b></label><input type="range" id="sOffset" min="-200" max="200" step="5">
         <p>노트가 소리보다 <b>먼저</b> 지나가면 + 쪽으로, <b>늦게</b> 오면 − 쪽으로 옮겨요. 블루투스 이어폰은 보통 +100~+180ms예요.</p></div>
+      <div class="toggle">엄지 배치 (폰)<button class="btn" id="sThumb" type="button"><span></span></button></div>
+      <p class="hint">롱노트를 누르는 동안 오는 노트는 반대쪽 손 레인으로 옮겨서 엄지 두 개로 칠 수 있게 해요.</p>
       <div class="toggle" id="rowKeys" hidden>드럼 연주 (키음)<button class="btn" id="sKeys" type="button"><span></span></button></div>
       <p class="hint" id="hintKeys" hidden>켜면 곡의 드럼이 노트를 칠 때만 나와요. 놓치면 드럼이 비어요.</p>
       <div class="setting"><label>타격음 <b id="sHitName"></b></label><div class="hits" id="sHits"></div></div>
@@ -500,6 +502,7 @@ save.speed = num(save.speed, 1, 8, 4.5); save.offset = num(save.offset, -200, 20
 save.sfx = save.sfx !== false; save.bga = save.bga !== false; // 드럼 키음이 준비된 뒤 처음 열면 한 번 켜 준다 (이전 버전에서 꺼진 채 저장된 경우)
 if (raw && raw.keysV !== 1) { save.keys = true; save.keysV = 1; }
 save.keys = KEYS_READY && save.keys !== false;
+if (typeof save.thumb !== 'boolean') save.thumb = null;
 // 타격음 기본값을 처음의 '틱'으로 되돌림 (이전 버전에서 저장된 값도 한 번 초기화)
 if (raw && raw.hitV !== 2) { save.hit = 'tick'; save.hitVol = 50; save.hitV = 2; }
 if (!HIT_TYPES.some(h => h.k === save.hit)) save.hit = 'tick';
@@ -1343,10 +1346,39 @@ function rhythmColor(t, chart) {
   const near = k => Math.abs(ph * k - Math.round(ph * k)) < .12;
   return near(1) ? RHY[0] : near(2) ? RHY[1] : near(4) ? RHY[2] : RHY[3];
 }
+// 폰(엄지 두 개)용 배치: 왼손 = 0·1 레인, 오른손 = 2·3 레인.
+// 한 손이 롱노트를 누르는 동안 오는 노트는 반대 손 레인으로, 동시치기는 양손에 하나씩, 양손이 다 바쁘면 생략.
+const PRIMARY_TOUCH = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+const thumbOn = () => (save.thumb === null ? PRIMARY_TOUCH : save.thumb);
+const MIRROR = [3, 2, 1, 0];
+function thumbChart(src) {
+  const hand = l => (l < 2 ? 0 : 1);
+  const list = src.map(([t, lane, len]) => ({t, lane, len})).sort((a, b) => a.t - b.t || a.lane - b.lane);
+  const out = [], holdEnd = [-1, -1], laneLast = [-9, -9, -9, -9];
+  for (const n of list) {
+    const busy = [holdEnd[0] > n.t - .02, holdEnd[1] > n.t - .02];
+    let lane = n.lane, h = hand(lane);
+    if (busy[0] && busy[1]) continue;
+    if (busy[h]) { lane = MIRROR[lane]; h = 1 - h; }
+    const same = out.filter(o => Math.abs(o.t - n.t) < .03);
+    if (same.some(o => hand(o.lane) === h)) {
+      const oh = 1 - h;
+      if (busy[oh] || same.some(o => hand(o.lane) === oh)) continue;
+      lane = MIRROR[lane]; h = oh;
+    }
+    if (n.t - laneLast[lane] < .06) continue;
+    let len = n.len;
+    if (len > 0 && (busy[1 - h] || same.length)) len = 0; // 양손이 동시에 묶이지 않게
+    out.push({t: n.t, lane, len});
+    laneLast[lane] = n.t + len;
+    if (len > 0) holdEnd[h] = n.t + len;
+  }
+  return out.map(o => [o.t, o.lane, o.len]);
+}
 function buildNotes(chart, diff) {
   pool.forEach(o => { o.head.destroy(); if (o.body) o.body.destroy(); });
   pool = []; notes = [];
-  chart[diff].forEach(([t, lane, len]) => {
+  (thumbOn() ? thumbChart(chart[diff]) : chart[diff]).forEach(([t, lane, len]) => {
     const tx = noteTex(rhythmColor(t, chart));
     const n = {t, lane, len, judged: false, tailDone: false, head: new PIXI.Sprite(tx.head), body: null};
     n.head.anchor.set(.5); n.head.visible = false;
@@ -1889,6 +1921,7 @@ function renderSettings() {
   $('#sSpeed').value = save.speed; $('#sSpeedV').textContent = save.speed.toFixed(1);
   $('#sOffset').value = save.offset; $('#sOffsetV').textContent = (save.offset > 0 ? '+' : '') + save.offset + 'ms';
   $('#sKeys span').textContent = save.keys ? 'ON' : 'OFF';
+  $('#sThumb span').textContent = thumbOn() ? 'ON' : 'OFF';
   $('#rowKeys').hidden = $('#hintKeys').hidden = !KEYS_READY;
   $('#sSfx span').textContent = save.sfx ? 'ON' : 'OFF'; $('#sBga span').textContent = save.bga ? 'ON' : 'OFF';
 }
@@ -1901,6 +1934,7 @@ $('#sHitVol').addEventListener('input', e => { save.hitVol = Number(e.target.val
 $('#sHitVol').addEventListener('change', () => { persist(); audio(); previewHit(save.hit === 'off' ? 'auto' : save.hit); });
 $('#sSfx').addEventListener('click', () => { save.sfx = !save.sfx; renderSettings(); persist(); });
 $('#sKeys').addEventListener('click', () => { save.keys = !save.keys; renderSettings(); persist(); });
+$('#sThumb').addEventListener('click', () => { save.thumb = !thumbOn(); renderSettings(); persist(); });
 $('#sBga').addEventListener('click', () => { save.bga = !save.bga; renderSettings(); persist(); });
 
 /* ---------- 시작 ---------- */
