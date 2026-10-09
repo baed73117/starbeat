@@ -211,6 +211,7 @@ button:focus-visible{outline:2px solid var(--max);outline-offset:3px}
 /* ---------- wipe transition ---------- */
 #wipe{position:absolute;inset:0;z-index:30;pointer-events:none;overflow:hidden}
 #wipe.on{pointer-events:auto}
+.wp-x{margin-top:14px;padding:9px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(10,12,24,.55);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
 .wp{position:absolute;top:-10%;bottom:-10%;width:78%;transition:transform .42s cubic-bezier(.75,0,.2,1)}
 .wp.l{left:-18%;background:linear-gradient(90deg,#05060F,#121637);border-right:4px solid var(--c1);transform:translateX(-115%) skewX(-12deg)}
 .wp.r{right:-18%;background:linear-gradient(270deg,#05060F,#121637);border-left:4px solid var(--dc);transform:translateX(115%) skewX(-12deg)}
@@ -416,7 +417,7 @@ body:has(input:focus,textarea:focus) #rotate{display:none!important}
   <!-- 화면 전환 -->
   <div id="wipe" aria-hidden="true">
     <div class="wp l"></div><div class="wp r"></div>
-    <div class="wp-c"><div class="wj" id="wJacket"></div><b id="wTitle"></b><span class="wp-d" id="wDiff"></span><div class="wp-bar"><i id="wBar"></i></div></div>
+    <div class="wp-c"><div class="wj" id="wJacket"></div><b id="wTitle"></b><span class="wp-d" id="wDiff"></span><div class="wp-bar"><i id="wBar"></i></div><button type="button" class="wp-x" id="wCancel" hidden>불러오기 취소</button></div>
   </div>
 
   <!-- 결과 -->
@@ -455,7 +456,7 @@ body:has(input:focus,textarea:focus) #rotate{display:none!important}
     <div class="card">
       <h2>OPTION</h2>
       <div class="setting"><label for="sSpeed">노트 속도 <b id="sSpeedV"></b></label><input type="range" id="sSpeed" min="1" max="8" step="0.5"></div>
-      <div class="setting"><label for="sOffset">싱크 조절 <b id="sOffsetV"></b></label><input type="range" id="sOffset" min="-200" max="200" step="5">
+      <div class="setting"><label for="sOffset">싱크 조절 <b id="sOffsetV"></b></label><input type="range" id="sOffset" min="-200" max="400" step="5">
         <p>노트가 소리보다 <b>먼저</b> 지나가면 + 쪽으로, <b>늦게</b> 오면 − 쪽으로 옮겨요. 블루투스 이어폰은 보통 +100~+180ms예요.</p></div>
       <div class="toggle">엄지 배치 (폰)<button class="btn" id="sThumb" type="button"><span></span></button></div>
       <p class="hint">롱노트를 누르는 동안 오는 노트는 반대쪽 손 레인으로 옮겨서 엄지 두 개로 칠 수 있게 해요.</p>
@@ -512,7 +513,7 @@ const fresh = () => ({speed: 4.5, offset: 0, sfx: true, bga: true, keys: true, k
 let save = fresh(), raw = null;
 try { raw = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (raw && typeof raw === 'object') save = Object.assign(fresh(), raw); else raw = null; } catch (e) {}
 const num = (v, lo, hi, d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
-save.speed = num(save.speed, 1, 8, 4.5); save.offset = num(save.offset, -200, 200, 0);
+save.speed = num(save.speed, 1, 8, 4.5); save.offset = num(save.offset, -200, 400, 0);
 save.sfx = save.sfx !== false; save.bga = save.bga !== false; // 드럼 키음이 준비된 뒤 처음 열면 한 번 켜 준다 (이전 버전에서 꺼진 채 저장된 경우)
 if (raw && raw.keysV !== 1) { save.keys = true; save.keysV = 1; }
 save.keys = KEYS_READY && save.keys !== false;
@@ -679,13 +680,15 @@ function uiSfx(kind) {
   o.onended = () => { o.disconnect(); g.disconnect(); };
 }
 // 지금 귀에 들리는 소리의 오디오 시각 (출력 지연까지 고려)
+let useTs = false;
 function clockAt(perf) {
   const fb = actx.currentTime - (actx.outputLatency || actx.baseLatency || 0) + (perf - performance.now()) / 1000;
   if (actx.getOutputTimestamp) {
     const ts = actx.getOutputTimestamp();
     if (ts && ts.contextTime > 0 && ts.performanceTime > 0) {
       const v = ts.contextTime + (perf - ts.performanceTime) / 1000;
-      if (Math.abs(v - fb) < .3) return v;
+      useTs = Math.abs(v - fb) < (useTs ? .5 : .3);
+      if (useTs) return v;
     }
   }
   return fb;
@@ -705,12 +708,12 @@ function fetchIdle(url, ms, sig) {
   return fetch(url, ctl ? {signal: ctl.signal} : {}).then(res => ({res, poke, done: () => clearTimeout(t)}), e => { clearTimeout(t); throw e; });
 }
 let bufCache = {key: null, main: null, alt: null, altJob: null}, loadSeq = 0;
-async function loadAudio(song, onProgress) {
+async function loadAudio(song, onProgress, sig) {
   const key = song.id + (save.keys ? ':k' : ':f'), seq = ++loadSeq;
   if (bufCache.key === key && bufCache.main) { onProgress(1); return bufCache; }
   if (bufCache.ctl) bufCache.ctl.abort();
   bufCache = {key: null, main: null, alt: null, altJob: null}; // 이전 곡은 먼저 놓아 준다 (메모리)
-  const main = await loadBuf(`songs/${song.id}.mp3`, onProgress);
+  const main = await loadBuf(`songs/${song.id}.mp3`, onProgress, false, sig);
   const entry = {key, main, alt: null, altJob: null, ctl: window.AbortController ? new AbortController() : null};
   const lowMem = navigator.deviceMemory && navigator.deviceMemory <= 2;
   if (save.keys && !lowMem) entry.altJob = loadBuf(`songs/${song.id}_h.mp3`, () => {}, true, entry.ctl && entry.ctl.signal).then(b => (entry.alt = b), () => null);
@@ -751,9 +754,9 @@ async function loadBuf(path, onProgress, light, sig) {
   return buf;
 }
 const chartCache = {};
-async function loadChart(song) {
+async function loadChart(song, sig) {
   if (chartCache[song.id]) return chartCache[song.id];
-  const {res: r, done} = await fetchIdle(A(`charts/${song.id}.json`), 15000);
+  const {res: r, done} = await fetchIdle(A(`charts/${song.id}.json`), 15000, sig);
   let c;
   try { if (!r.ok) throw new Error('chart'); c = await r.json(); } finally { done(); }
   if (!DIFFS.every(d => Array.isArray(c[d.k]))) throw new Error('chart');
@@ -1111,7 +1114,7 @@ const prev = $('#preview');
 // 미리듣기: 곡의 하이라이트 20초만 부드럽게 반복
 const PREV_LEN = 20;
 let prevFade = 0, prevTok = 0, prevTimer = 0, prevLoopT = 0, prevStart = 0;
-function schedulePreview() { clearTimeout(prevTimer); clearTimeout(prevLoopT); fadePreview(0); prevTimer = setTimeout(() => { if (state === 'select') preview(sel); }, 420); }
+function schedulePreview() { prevTok++; clearTimeout(prevTimer); clearTimeout(prevLoopT); fadePreview(0); prevTimer = setTimeout(() => { if (state === 'select') preview(sel); }, 420); }
 function preview(song, now) {
   if (!song) return;
   clearTimeout(prevTimer); clearInterval(prevFade); clearTimeout(prevLoopT);
@@ -1221,6 +1224,7 @@ function initGraphics() {
     buildTextures();
     try { app = new PIXI.Application({resizeTo: $('#stage'), backgroundColor: 0x060812, antialias: !IS_TOUCH, powerPreference: 'high-performance', autoDensity: true, resolution: Math.min(qp().res, window.devicePixelRatio || 1), sharedTicker: true}); }
     catch (e) { app = null; gfxReady = null; throw new Error('nopixi'); }
+    app.stage.eventMode = 'none';   // 이 게임은 Pixi 클릭을 안 씀 → 손가락 움직일 때 노트 수천 개를 훑지 않게
     app.view.style.visibility = 'hidden';
     $('#stage').prepend(app.view);
     L.bga = new PIXI.Container(); app.stage.addChild(L.bga);
@@ -1429,7 +1433,7 @@ function wipeIn(song, diff) {
 }
 function wipeOut() { $('#wipe').classList.remove('on'); return wait(450); }
 
-let busy = false;
+let busy = false, loadAbort = null;
 async function startSong(song, diff) {
   if (busy) return;
   busy = true;
@@ -1449,15 +1453,21 @@ async function startSongInner(song, diff) {
   await wipeIn(song, diff);
   cur = null;
   let chart, aud;
+  const ab = window.AbortController ? new AbortController() : null;
+  loadAbort = ab;
+  const cancelT = setTimeout(() => { if (state === 'loading' && loadAbort === ab) $('#wCancel').hidden = false; }, 6000);
   try {
     await initGraphics();
     await Promise.race([coverJobs[song.id] || Promise.resolve(), wait(1500)]);
-    [chart, aud] = await Promise.all([loadChart(song), loadAudio(song, p => { $('#wBar').style.transform = `scaleX(${p})`; })]);
+    [chart, aud] = await Promise.all([loadChart(song, ab && ab.signal), loadAudio(song, p => { $('#wBar').style.transform = `scaleX(${p})`; }, ab && ab.signal)]);
     await prepareHits(chart, song);
   } catch (e) {
+    clearTimeout(cancelT); $('#wCancel').hidden = true;
+    if (ab && ab.signal.aborted) { goSelect(); return; }   // 직접 취소했으면 안내 없이 곡 선택으로
     toast(e && e.message === 'nopixi' ? '이 브라우저에서는 게임 그래픽(WebGL)을 켤 수 없어요.' : '곡을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
     goSelect(); return;
   }
+  clearTimeout(cancelT); $('#wCancel').hidden = true; loadAbort = null;
   if (state !== 'loading') { $('#wipe').classList.remove('on'); return; }
   cur = {song, diff, chart};
   setTheme(song, diff);
@@ -1493,6 +1503,7 @@ async function startSongInner(song, diff) {
   stageRect = null;
   wipeOut();
   countdown();
+  watchAudio(); armBack();
   if (document.hidden || (landscapeMQ && landscapeMQ.matches)) pauseGame();
 }
 let countTimers = [];
@@ -1827,7 +1838,7 @@ function finish() {
   $('#rNew').hidden = !isNew;
   const badge = $('#rBadge'); badge.hidden = !fc; badge.textContent = perfect && fc ? 'PERFECT' : 'FULL COMBO'; badge.className = 'badge' + (perfect && fc ? ' pp' : '');
   $('#bragText').hidden = true;
-  RankUI.show('starbeat', Math.round(score), `${cur.song.title} · ${DIFF[diff].name} ${cur.song.levels[diff]}`);
+  RankUI.show('starbeat', Math.round(score), `${cur.song.title} · ${DIFF[diff].name} ${cur.song.levels[diff]}${thumbOn() ? ' · 엄지' : ''}`);
   const bn = $('#banner');
   $('#bannerText').textContent = perfect && fc ? 'PERFECT PLAY' : fc ? 'FULL COMBO' : 'CLEAR';
   bn.hidden = false; bn.classList.remove('go'); void bn.offsetWidth; bn.classList.add('go');
@@ -1897,12 +1908,13 @@ const RankUI = {
         btn.textContent = '✔ 랭킹에 올렸어요';
         return;
       }
-      if (r && r.why === 'slow' && auto === true && run === this.run) {
+      const retry = r && (r.why === 'slow' || r.why === 'busy' || r.why === 'error');
+      if (retry && auto === true && run === this.run) {
         msg.textContent = '잠시 후 자동으로 다시 올려요…'; btn.disabled = false; btn.textContent = '🏆 랭킹에 올리기';
         setTimeout(() => { if (run === this.run) this.up('retry'); }, 5500);
         return;
       }
-      text = r && r.why === 'slow' ? '잠깐만요, 몇 초 뒤에 다시 눌러 주세요.' : '이 점수는 랭킹에 올릴 수 없어요.';
+      text = retry ? '잠깐만요, 몇 초 뒤에 다시 눌러 주세요.' : '이 점수는 랭킹에 올릴 수 없어요.';
     } catch (e) { text = '지금은 연결이 안 돼요. 잠시 후 다시 눌러 주세요.'; }
     if (run !== this.run) return;
     msg.textContent = text; btn.disabled = false; btn.textContent = '🏆 랭킹에 올리기';
@@ -1919,7 +1931,7 @@ async function brag() {
 /* ---------- 흐름 ---------- */
 let runId = 0;
 function stopSong() {
-  runId++; altPending = false; held.clear();
+  runId++; altPending = false; held.clear(); cancelResume();
   stopDrums();
   if (srcNode) { try { srcNode.onended = null; srcNode.stop(); } catch (e) {} try { srcNode.disconnect(); } catch (e) {} srcNode = null; }
   pool.forEach(n => { n.head.visible = false; if (n.body) n.body.visible = false; });
@@ -1938,6 +1950,11 @@ function goSelect() {
   prevTimer = setTimeout(() => { if (state === 'select' && $('#sheet').hidden && !$('#select').hidden) preview(sel); }, 350);
 }
 function pauseGame() {
+  if (state === 'play' && resumeTimers.length) {      // 3·2·1 세는 중에 다시 멈추면
+    cancelResume(); $('#count').hidden = true; $('#pause').hidden = false; laneDown = [0, 0, 0, 0]; held.clear();
+    if (app) app.stop();
+    return;
+  }
   if (state !== 'play' || paused) return;
   paused = true;
   laneDown = [0, 0, 0, 0]; held.clear();
@@ -1946,16 +1963,38 @@ function pauseGame() {
   clearCountdown();
   if (app) app.stop();
 }
+let resumeTimers = [], backArmed = false;
+function armBack() { if (backArmed) return; try { history.pushState({sb: 1}, ''); backArmed = true; } catch (e) {} }
+window.addEventListener('popstate', () => { backArmed = false; if (state === 'play') { pauseGame(); armBack(); } });
+function cancelResume() { resumeTimers.forEach(clearTimeout); resumeTimers = []; }
 function resumeGame() {
-  if (!paused || state !== 'play') return;
+  if (!paused || state !== 'play' || resumeTimers.length) return;
   if (landscapeMQ && landscapeMQ.matches) return;   // 가로 화면에서는 계속하지 않기
   $('#pause').hidden = true;
-  paused = false; resumedAt = performance.now();
-  if (app) app.start();
+  if (app) app.start();                             // 아직 멈춘 상태 → 노트는 제자리에 보임
   // 누르고 있던 롱노트는 다시 누를 수 없으니 정리
   for (let l = 0; l < 4; l++) { const h = holding[l]; if (h && !h.tailDone) { h.tailDone = true; if (h.body) h.body.visible = false; holding[l] = null; apply(null, l); } }
-  if (actx) actx.resume().catch(() => {});
-  if (songTimeAt(performance.now()) < 0) countdown();
+  // 곡 중간이면 3·2·1 세고 나서 다시 시작 (손가락을 레인에 올릴 시간)
+  const go = () => {
+    resumeTimers = []; $('#count').hidden = true;
+    paused = false; resumedAt = performance.now();
+    if (actx) actx.resume().catch(() => {});
+    watchAudio();
+    if (songTimeAt(performance.now()) < 0) countdown();
+  };
+  if (!actx || !startAt || songTimeAt(performance.now()) < 0) { go(); return; }
+  const el = $('#count'), tx = $('#countText');
+  [3, 2, 1].forEach((n, i) => resumeTimers.push(setTimeout(() => {
+    el.hidden = false; tx.textContent = n; el.classList.remove('show');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  }, i * 600)));
+  resumeTimers.push(setTimeout(go, 1800));
+}
+// 소리가 다시 안 켜졌으면(전화·알람 뒤 등) 진행된 척하지 말고 멈춤
+function watchAudio() {
+  setTimeout(() => {
+    if (state === 'play' && !paused && actx && actx.state !== 'running') { pauseGame(); toast('소리가 멈췄어요. 계속하기를 눌러 주세요.'); }
+  }, 1500);
 }
 let toastT;
 function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
@@ -2001,9 +2040,9 @@ const KEYS = {KeyD: 0, KeyF: 1, KeyJ: 2, KeyK: 3, KeyS: 0, KeyL: 3, Digit1: 0, D
 const overlayOpen = () => !$('#settings').hidden || !$('#sheet').hidden;
 document.addEventListener('keydown', e => {
   if (state === 'play') {
-    if (e.key === 'Escape') { if (paused) resumeGame(); else pauseGame(); return; }
+    if (e.key === 'Escape') { if (e.repeat) return; if (paused || resumeTimers.length) { if (resumeTimers.length) pauseGame(); else resumeGame(); } else pauseGame(); return; }
     const l = KEYS[e.code]; if (l === undefined || e.repeat) return;
-    e.preventDefault(); press(l, evT(e)); return;
+    e.preventDefault(); if (!paused) { held.set('k' + e.code, l); press(l, evT(e)); } return;
   }
   if (e.key === 'Escape') { if (!$('#sheet').hidden) $('#sheet').hidden = true; else if (!$('#settings').hidden) closeSettings(); return; }
   if (!$('#title').hidden && !titleLeaving && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); leaveTitle(); return; }
@@ -2015,9 +2054,10 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowDown') { e.preventDefault(); setDiff(DIFFS[Math.min(DIFFS.length - 1, i + 1)].k); }
   else if (e.key === 'Enter' && document.activeElement === document.body) { e.preventDefault(); startSong(sel, save.diff); }
 });
-document.addEventListener('keyup', e => { const l = KEYS[e.code]; if (l !== undefined) release(l, evT(e)); });
+document.addEventListener('keyup', e => { if (KEYS[e.code] !== undefined) up('k' + e.code, evT(e)); });
 
 $('#btnPlay').addEventListener('click', () => { audio(); startSong(sel, save.diff); });
+$('#wCancel').addEventListener('click', () => { if (loadAbort) loadAbort.abort(); });
 $('#btnRetry').addEventListener('click', () => { if (cur) startSong(cur.song, cur.diff); });
 $('#btnBack').addEventListener('click', goSelect);
 $('#btnBrag').addEventListener('click', brag);
@@ -2027,7 +2067,10 @@ $('#btnPause').addEventListener('click', pauseGame);
 $('#btnResume').addEventListener('click', resumeGame);
 $('#btnPRetry').addEventListener('click', () => { if (cur) startSong(cur.song, cur.diff); });
 $('#btnQuit').addEventListener('click', goSelect);
-document.addEventListener('visibilitychange', () => { if (document.hidden) { pauseGame(); stopPreview(); } });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { pauseGame(); stopPreview(); }
+  else if (state === 'select' && !$('#select').hidden && $('#sheet').hidden) schedulePreview();
+});
 window.addEventListener('blur', () => { if (state === 'play') pauseGame(); });
 window.addEventListener('resize', () => { stageRect = null; if (!$('#select').hidden) layoutFlow(); });
 const landscapeMQ = window.matchMedia ? matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)') : null;
